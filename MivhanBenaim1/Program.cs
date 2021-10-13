@@ -15,7 +15,6 @@ namespace MivhanBenaim1
             Console.CursorVisible = false;
             Console.SetWindowSize(80, 25);
             int moves = 0;
-
             bool isGameGoing = true;
             Random random = new Random();
             Point starPosition = new Point(random.Next(80), random.Next(25));
@@ -52,7 +51,6 @@ namespace MivhanBenaim1
                             starPosition.Y--;
                             moves++;
                         }
-
                         break;
                     case ConsoleKey.DownArrow:
                         if (starPosition.Y < 24)
@@ -61,7 +59,6 @@ namespace MivhanBenaim1
                             starPosition.Y++;
                             moves++;
                         }
-
                         break;
                     case ConsoleKey.RightArrow:
                         if (starPosition.X < 79)
@@ -70,7 +67,6 @@ namespace MivhanBenaim1
                             starPosition.X++;
                             moves++;
                         }
-
                         break;
                     case ConsoleKey.LeftArrow:
                         if (starPosition.X > 0)
@@ -79,13 +75,12 @@ namespace MivhanBenaim1
                             starPosition.X--;
                             moves++;
                         }
-
                         break;
                 }
 
-                if(abstackleMap[starPosition.X, starPosition.Y])
+                if (abstackleMap[starPosition.X, starPosition.Y])
                 {
-                    if(++figuresAmount == 15)
+                    if (++figuresAmount == 15)
                     {
                         Console.Clear();
                         Console.SetCursorPosition(40, 13);
@@ -97,11 +92,12 @@ namespace MivhanBenaim1
 
                     goToNextLevel = true;
                     Console.Clear();
+                    Console.CursorVisible = false;
                     abstackleMap = new bool[80, 25];
                     moves = 0;
                 }
 
-                Console.SetCursorPosition(0,0);
+                Console.SetCursorPosition(0, 0);
                 Console.ForegroundColor = ConsoleColor.White;
                 int freeCellsAmount = FreeCellsAmount();
                 Console.Write("Moves " + moves + " of " + freeCellsAmount);
@@ -125,7 +121,7 @@ namespace MivhanBenaim1
         {
             int count = 0;
 
-            foreach(bool cell in abstackleMap)
+            foreach (bool cell in abstackleMap)
             {
                 if (!cell)
                 {
@@ -142,7 +138,7 @@ namespace MivhanBenaim1
 
             for (int i = 0; i < figuresAmount; i++)
             {
-                switch (random.Next(3))
+                switch (random.Next(4))
                 {
                     case 0:
                         DrawLine(random.Next(2, 10));
@@ -207,19 +203,17 @@ namespace MivhanBenaim1
         }
         private static void DrawTriangle(int size)
         {
-            {
-                Random random = new Random();
-                Console.ForegroundColor = (ConsoleColor)random.Next(1, 14);
-                Point point = new Point(random.Next(80 - size), random.Next(25 - size));
+            Random random = new Random();
+            Console.ForegroundColor = (ConsoleColor)random.Next(1, 14);
+            Point point = new Point(random.Next(80 - size), random.Next(25 - size));
 
-                for (int i = 0; i < size; i++)
-                    for (int j = 0; j < i + 1; j++)
-                    {
-                        Console.SetCursorPosition(point.X + i, point.Y + j);
-                        abstackleMap[point.X + i, point.Y + j] = true;
-                        Console.Write('#');
-                    }
-            }
+            for (int i = 0; i < size; i++)
+                for (int j = 0; j < i + 1; j++)
+                {
+                    Console.SetCursorPosition(point.X + j, point.Y + i);
+                    abstackleMap[point.X + j, point.Y + i] = true;
+                    Console.Write('#');
+                }
         }
     }
 }
