@@ -7,8 +7,6 @@ namespace MivhanBenaim1
 {
     class Program
     {
-        private static bool[,] abstackleMap = new bool[80, 25];
-
         static void Main(string[] args)
         {
             Console.OutputEncoding = new UTF8Encoding();
@@ -16,26 +14,42 @@ namespace MivhanBenaim1
             Console.SetWindowSize(80, 25);
             int moves = 0;
             bool isGameGoing = true;
-            Random random = new Random();
-            Point starPosition = new Point(random.Next(80), random.Next(25));
+            Point starPosition = new Point(StaticRandom.Next(80), StaticRandom.Next(25));
             ConsoleKeyInfo key;
             bool goToNextLevel = true;
-            int figuresAmount = random.Next(3, 6);
+            int figuresAmount = StaticRandom.Next(3, 6);
+            IBoardService boardService = new BoardService();
 
             while (isGameGoing)
             {
                 if (goToNextLevel)
                 {
-                    DrawFigures(figuresAmount);
+                    boardService.DrawFigures(figuresAmount);
                     goToNextLevel = false;
-                    starPosition = new Point(random.Next(80), random.Next(25));
+                    starPosition = new Point(StaticRandom.Next(80), StaticRandom.Next(25));
+
+                    while (boardService.AbstackleMap[starPosition.X, starPosition.Y])
+                    {
+                        starPosition = new Point(StaticRandom.Next(80), StaticRandom.Next(25));
+                    }
+
+                    //panel with text and scores as abstackle
+                    for (int i = 0; i < 18; i++)
+                    {
+                        boardService.AbstackleMap[i, 0] = true;
+                    }
+                    //second line as abstackle
+                    for (int i = 0; i < 10; i++)
+                    {
+                        boardService.AbstackleMap[i, 1] = true;
+                    }
                 }
 
                 Console.SetCursorPosition(starPosition.X, starPosition.Y);
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write('*');
 
-                Thread.Sleep(50);
+                //Thread.Sleep(50);
 
                 key = Console.ReadKey(true);
                 Console.SetCursorPosition(starPosition.X, starPosition.Y);
@@ -47,7 +61,7 @@ namespace MivhanBenaim1
                     case ConsoleKey.UpArrow:
                         if (starPosition.Y > 0)
                         {
-                            abstackleMap[starPosition.X, starPosition.Y] = true;
+                            boardService.AbstackleMap[starPosition.X, starPosition.Y] = true;
                             starPosition.Y--;
                             moves++;
                         }
@@ -55,7 +69,7 @@ namespace MivhanBenaim1
                     case ConsoleKey.DownArrow:
                         if (starPosition.Y < 24)
                         {
-                            abstackleMap[starPosition.X, starPosition.Y] = true;
+                            boardService.AbstackleMap[starPosition.X, starPosition.Y] = true;
                             starPosition.Y++;
                             moves++;
                         }
@@ -63,7 +77,7 @@ namespace MivhanBenaim1
                     case ConsoleKey.RightArrow:
                         if (starPosition.X < 79)
                         {
-                            abstackleMap[starPosition.X, starPosition.Y] = true;
+                            boardService.AbstackleMap[starPosition.X, starPosition.Y] = true;
                             starPosition.X++;
                             moves++;
                         }
@@ -71,14 +85,14 @@ namespace MivhanBenaim1
                     case ConsoleKey.LeftArrow:
                         if (starPosition.X > 0)
                         {
-                            abstackleMap[starPosition.X, starPosition.Y] = true;
+                            boardService.AbstackleMap[starPosition.X, starPosition.Y] = true;
                             starPosition.X--;
                             moves++;
                         }
                         break;
                 }
 
-                if (abstackleMap[starPosition.X, starPosition.Y])
+                if (boardService.AbstackleMap[starPosition.X, starPosition.Y])
                 {
                     if (++figuresAmount == 15)
                     {
@@ -93,17 +107,17 @@ namespace MivhanBenaim1
                     goToNextLevel = true;
                     Console.Clear();
                     Console.CursorVisible = false;
-                    abstackleMap = new bool[80, 25];
+                    boardService.AbstackleMap = new bool[80, 25];
                     moves = 0;
                 }
 
                 Console.SetCursorPosition(0, 0);
                 Console.ForegroundColor = ConsoleColor.White;
-                int freeCellsAmount = FreeCellsAmount();
-                Console.Write("Moves " + moves + " of " + freeCellsAmount);
+                int freeCellsAmount = FreeCellsAmount(boardService);
+                Console.Write("Moves {0, 4} of {1, 4}", moves, freeCellsAmount);
                 Console.SetCursorPosition(0, 1);
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("Figures " + figuresAmount);
+                Console.Write("Figures {0, 2}", figuresAmount);
 
                 if (freeCellsAmount == 0)
                 {
@@ -117,11 +131,11 @@ namespace MivhanBenaim1
             }
         }
 
-        private static int FreeCellsAmount()
+        private static int FreeCellsAmount(IBoardService boardService)
         {
             int count = 0;
 
-            foreach (bool cell in abstackleMap)
+            foreach (bool cell in boardService.AbstackleMap)
             {
                 if (!cell)
                 {
@@ -130,90 +144,6 @@ namespace MivhanBenaim1
             }
 
             return count;
-        }
-
-        private static void DrawFigures(int figuresAmount)
-        {
-            Random random = new Random();
-
-            for (int i = 0; i < figuresAmount; i++)
-            {
-                switch (random.Next(4))
-                {
-                    case 0:
-                        DrawLine(random.Next(2, 10));
-                        break;
-                    case 1:
-                        DrawSquare(random.Next(3, 10));
-                        break;
-                    case 2:
-                        DrawParallelogram(random.Next(3, 10));
-                        break;
-                    case 3:
-                        DrawTriangle(random.Next(3, 10));
-                        break;
-                }
-            }
-        }
-
-        private static void DrawLine(int size)
-        {
-            Random random = new Random();
-            Console.ForegroundColor = (ConsoleColor)random.Next(1, 14);
-            Point point = new Point(random.Next(80 - size), random.Next(25));
-
-            for (int i = 0; i < size; i++)
-            {
-                Console.SetCursorPosition(point.X + i, point.Y);
-                abstackleMap[point.X + i, point.Y] = true;
-                Console.Write('=');
-            }
-        }
-
-        private static void DrawSquare(int size)
-        {
-            Random random = new Random();
-            Console.ForegroundColor = (ConsoleColor)random.Next(1, 14);
-            Point point = new Point(random.Next(80 - size), random.Next(25 - size));
-
-            for (int i = 0; i < size; i++)
-            {
-                for (int j = 0; j < size; j++)
-                {
-                    Console.SetCursorPosition(point.X + i, point.Y + j);
-                    abstackleMap[point.X + i, point.Y + j] = true;
-                    Console.Write('ם');
-                }
-            }
-
-        }
-        private static void DrawParallelogram(int size)
-        {
-            Random random = new Random();
-            Console.ForegroundColor = (ConsoleColor)random.Next(1, 14);
-            Point point = new Point(random.Next(79 - size * 2), random.Next(25 - size));
-
-            for (int i = 0; i < size; i++)
-                for (int j = i; j < size + i; j++)
-                {
-                    Console.SetCursorPosition(point.X + j, point.Y + i);
-                    abstackleMap[point.X + j, point.Y + i] = true;
-                    Console.Write('ם');
-                }
-        }
-        private static void DrawTriangle(int size)
-        {
-            Random random = new Random();
-            Console.ForegroundColor = (ConsoleColor)random.Next(1, 14);
-            Point point = new Point(random.Next(80 - size), random.Next(25 - size));
-
-            for (int i = 0; i < size; i++)
-                for (int j = 0; j < i + 1; j++)
-                {
-                    Console.SetCursorPosition(point.X + j, point.Y + i);
-                    abstackleMap[point.X + j, point.Y + i] = true;
-                    Console.Write('#');
-                }
         }
     }
 }
